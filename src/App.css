@@ -1,0 +1,74 @@
+#root {
+    width: 100%;
+    height: 100%;
+    background-color: lightgray;
+}
+
+.App {
+    display: -webkit-flex;
+    display: -moz-flex;
+    display: -ms-flex;
+    display: -o-flex;
+    display: flex;
+    justify-content: space-around;
+    -ms-align-items: center;
+    align-items: center;
+    flex-flow: column nowrap;
+    width: 100%;
+    height: 100%;
+}
+
+.select-output-wrap {
+    justify-content: space-between;
+    display: -webkit-flex;
+    display: -moz-flex;
+    display: -ms-flex;
+    display: -o-flex;
+    display: flex;
+    -ms-align-items: center;
+    align-items: center;
+    width: 10%;
+    text-align: center;
+}
+
+.text-output {
+    background-color: burlywood;
+    position: relative;
+    flex: 25;
+    border-right: none;
+}
+
+.text-output p {
+    margin: 0;
+}
+
+.menu-opener {
+    flex: 1;
+    background-color: lavender;
+}
+
+.fa-angle-down {
+    color: black;
+    font-size: 1em;
+}
+
+.hidden-elements {
+    display: none;
+    text-align: center;
+    position: absolute;
+    background-color: burlywood;
+    width: 100%;    
+}
+
+.the-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.the-list li:nth-child(odd) {
+    background-color: lavender;
+}
+.the-list li:hover {
+    background-color: white;
+}

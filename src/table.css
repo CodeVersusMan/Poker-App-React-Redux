@@ -1,0 +1,97 @@
+.round-table {
+    width: 55%;
+    height: 40%;
+    background-color: green;
+    border-radius: 40%;
+    display: -moz-flex;
+    display: -ms-flex;
+    display: -o-flex;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-pack: distribute;
+    justify-content: space-around;
+    -ms-align-items: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+}
+
+.card {
+    border: 2px solid white;
+    background-color: lightblue;
+    width: 9%;
+    height: 35%;
+    display: -moz-flex;
+    display: -ms-flex;
+    display: -o-flex;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -ms-align-items: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+}
+.card-matched {
+    border: 2px solid red !important;
+}
+.button {
+    width: 5%;
+    height: 10%;
+    background-color: darkred;
+    border: 1px solid white;
+}
+
+.player {
+    display: -moz-flex;
+    display: -ms-flex;
+    display: -o-flex;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-pack: distribute;
+    justify-content: space-around;
+    -ms-align-items: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    width: 22%;
+    height: 22%;
+    border: 2px solid green;
+    border-radius: 20%;
+}
+
+.player .card {
+    width: 24%;
+    height: 65%;
+}
+
+.invisible {
+    border: 2px solid white;
+    background-color: lightblue;
+    width: 9%;
+    height: 35%;
+    display: -moz-flex;
+    display: -ms-flex;
+    display: -o-flex;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -ms-align-items: center;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    visibility: hidden;
+}
+
+.value-style {
+    text-align: center;
+    font-size: 0.9rem;
+}
