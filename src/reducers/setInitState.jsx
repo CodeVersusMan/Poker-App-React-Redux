@@ -4,9 +4,8 @@ const setInitState = (amountOfPlayers) => {
         listOfPlayers.push({
             id: i,
             playerName: 'Player ' + (i+1),
-            combo: 0,
             playerChips: 1500,
-            comboTemp: {
+            combo: {
                 comboStrength: 0,
                 comboRank: 0
             }

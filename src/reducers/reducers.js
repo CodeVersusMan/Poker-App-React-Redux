@@ -1,18 +1,24 @@
-import {initState} from './setInitState'
+import { initState } from './setInitState'
+import { deck } from './createDeck'
+import { shuffle } from './createDeck'
+import { playerColorList } from './playerColorList'
 
 const reducer = (state = initState, action) => {
     switch (action.type) {
-        case 'NEXT_TURN': return flipCard(state);
-        case 'MAKE_BET': return handleBet(state, action);
-        default: return state;
+        case 'NEXT_TURN':
+            return flipCard(state);
+        case 'MAKE_BET':
+            return handleBet(state, action);
+        default:
+            return state;
     }
 };
 
 export default reducer;
 
 const handleBet = (state, action) => {
-    const {amount, player} = action;
-    const {pot, players} = state;
+    const { amount, player } = action;
+    const { pot, players } = state;
     const calculatedChips = player.playerChips - parseInt(amount, 10);
 
     if (calculatedChips < 0) {
@@ -46,33 +52,40 @@ const handleBet = (state, action) => {
 
 const flipCard = (state) => {
 
-    console.log(state)
+    const { enterAt } = state;
 
-    const {enterAt} = state;
+    console.log(state);
 
     if (!enterAt.deal) {
-        let deckTemp = createDeck();
-        shuffle(deckTemp);
-        checkCombos(deckTemp, state);
+        const shuffledDeck = shuffle(deck);
+        checkCombos(shuffledDeck, state);
         return {
             ...state,
-            enterAt: { ...enterAt, deal: true },
-            deck: deckTemp
+            enterAt: { ...enterAt,
+                      deal: true
+                     },
+            deck: shuffledDeck
         };
     } else if (enterAt.deal && !enterAt.flop) {
         return {
             ...state,
-            enterAt: { ...enterAt, flop: true }
+            enterAt: { ...enterAt,
+                      flop: true
+                     }
         };
     } else if (enterAt.flop && !enterAt.turn) {
         return {
             ...state,
-            enterAt: { ...enterAt, turn: true }
+            enterAt: { ...enterAt,
+                      turn: true
+                     }
         };
     } else if (enterAt.turn && !enterAt.river) {
         return {
             ...state,
-            enterAt: { ...enterAt, river: true }
+            enterAt: { ...enterAt,
+                      river: true
+                     }
         };
     } else if (enterAt.river) {
         return checkWinner(state);
@@ -81,18 +94,29 @@ const flipCard = (state) => {
 
 const checkWinner = (state) => {
 
-    const {pot, enterAt, players} = state;
+    const {
+        pot,
+        enterAt,
+        players
+    } = state;
 
-    let max = players[0].combo;
+    let maxRank = players[0].combo.comboRank;
+    let maxStrength = players[0].combo.comboStrength;
     let winner = players[0];
     let winnerIndex = 0;
 
-    for (let i = 0; i<players.length; i++) {
-        if (players[i].combo > max) {
-            max = players[i].combo
+    for (let i = 0; i < players.length; i++) {
+        if (players[i].combo.comboRank > maxRank) {
+            maxRank = players[i].combo.comboRank
             winner = players[i];
             winnerIndex = i;
-        } 
+        } else if (players[i].combo.comboRank === maxRank) {
+            if (players[i].combo.comboStrength > maxStrength) {
+                maxStrength = players[i].combo.comboStrength
+                winner = players[i];
+                winnerIndex = i;
+            }
+        }
     }
 
     alert(winner.playerName + ' won!')
@@ -103,7 +127,10 @@ const checkWinner = (state) => {
             [key]: false
         }))),
         players: players.map((player, index) => {
-            player.combo = 0;
+            player.combo = {
+                comboStrength: 0,
+                comboRank: 0
+            };
             if (index === winnerIndex) {
                 return {
                     ...player,
@@ -117,113 +144,222 @@ const checkWinner = (state) => {
 
 const checkCombos = (deck, state) => {
     const {players} = state;
-    for (let i = 0; i<players.length; i++) {
+    for (let i = 0; i < players.length; i++) {
         parseCards(i, deck, state);
-    } 
+    }
 }
 
-const parseCards = (forWhichPlayer, deck, state) => { 
-
-    const playerColorsList = ['red', 'blue', 'green', 'pink', 'brown', 'orange'];
-
-    const {players} = state;
-    let jStart = 0;
-    let playerNumber = forWhichPlayer;
-    const indexOfTableCards = players.length * 2;
-    let tableCards = deck.slice(indexOfTableCards, indexOfTableCards+5);
-
-    if (forWhichPlayer !== 0) {
-        playerNumber = playerNumber + playerNumber;
+const checkHighestCard = (hand) => {
+    let max = hand[0].strength;
+    for (let i = 0; i < hand.length; i++) {
+        if (hand[i].strength > max) {
+            max = hand[i].strength
+        }
     }
+    return max;
+}
 
-    let slicePlayerHandFromDeck = deck.slice(playerNumber, playerNumber+2);
-    slicePlayerHandFromDeck = slicePlayerHandFromDeck.concat(tableCards);
-
-    for (let i = 0; i < 7; i++) {
-        for (let j = jStart; j < 7; j++) {
-            if (i !== j) {
-                if (slicePlayerHandFromDeck[i].value === slicePlayerHandFromDeck[j].value) {
-                    let lastIndexOfI = slicePlayerHandFromDeck[i].comboStatus.playerColors.length - 1;
-                    let lastIndexOfJ = slicePlayerHandFromDeck[j].comboStatus.playerColors.length - 1;
-                    let lastItemOfI = slicePlayerHandFromDeck[i].comboStatus.playerColors[lastIndexOfI];
-                    let lastItemOfJ = slicePlayerHandFromDeck[j].comboStatus.playerColors[lastIndexOfJ];
-                    if (i > 1) {
-                        if (lastItemOfI !== 'purple') {
-                            slicePlayerHandFromDeck[i].comboStatus.status = true;
-                            slicePlayerHandFromDeck[i].comboStatus.playerColors.push('purple')
-                        }
-                        if (lastItemOfJ !== 'purple') {
-                            slicePlayerHandFromDeck[j].comboStatus.status = true;
-                            slicePlayerHandFromDeck[j].comboStatus.playerColors.push('purple')
-                        }
-                    } else {
-                        slicePlayerHandFromDeck[i].comboStatus.status = true;
-                        slicePlayerHandFromDeck[i].comboStatus.playerColors.push(playerColorsList[forWhichPlayer]) 
-
-                        slicePlayerHandFromDeck[j].comboStatus.status = true;
-                        slicePlayerHandFromDeck[j].comboStatus.playerColors.push(playerColorsList[forWhichPlayer])
-                    }
-                    players[forWhichPlayer].combo += slicePlayerHandFromDeck[i].strength + slicePlayerHandFromDeck[j].strength;
+const searchForUniqueCardsWithCombo = (hand) => {
+    let onlyComboCards = hand.filter(card => card.comboStatus.status === true);
+    let jStart = 0;
+    const ownComboCards = [];
+    for (let i = 0; i<onlyComboCards.length; i++) {
+        for (let j = jStart; j<onlyComboCards.length; j++){
+            if (i!==j) {
+                if (onlyComboCards[i].value === onlyComboCards[j].value) {
+                    ownComboCards.push(onlyComboCards[i])
+                    /* Searches for non-unique
+                    ownComboCards.push(onlyComboCards[j])
+                    */
                 }
             }
         }
         jStart++;
     }
+    return ownComboCards;
 }
+const checkStraight = (hand, forWhichPlayer) => {
 
-const createDeck = () => {
-    const Spade = '\u2660';
-    const Diamond = '\u2666';
-    const Heart = '\u2665';
-    const Club = '\u2663';
+    hand.sort((a,b) => a.strength - b.strength);
 
-    const suits = [
-        Diamond, 
-        Heart, 
-        Spade,
-        Club
-    ]
-    const values = [
-        'Two',
-        'Three',
-        'Four',
-        'Five',
-        'Six',
-        'Seven',
-        'Eight',
-        'Nine',
-        'Ten',
-        'Jack',
-        'Queen',
-        'King',
-        'Ace'
-    ]
-    const deckTemp = [];
-    let deckIndex = 0;
+    let counter = 0;
+    let itemCached = hand[0].strength;
 
-    for (let i = 0; i<values.length; i++) {
-        let SemanticStrength = i+2;
-        for (let j = 0; j<suits.length; j++) {
-            deckTemp[deckIndex] = {
-                id: deckIndex,
-                value: values[i],
-                suit: suits[j],
-                strength: SemanticStrength,
-                comboStatus: {
-                    status: false,
-                    playerColors: []
+    for (let i = 1; i<hand.length; i++) {
+        if (hand[i].strength === itemCached + 1) {
+            counter++;
+        } else {
+            counter = 0;
+        }
+        itemCached = hand[i].strength;
+    }
+    if (counter >= 4) {
+        hand.slice(2,8).map(card => {
+            if (card.comboStatus.playerColors.indexOf(playerColorList[forWhichPlayer]) === -1) {
+                card.comboStatus.playerColors.push(playerColorList[forWhichPlayer])
+            }
+            return card.comboStatus.status = true;
+        });
+        return 4;
+    }
+    return false;
+};
+
+const checkFlush = (hand, forWhichPlayer) => {
+    let jStart = 0;
+    for (let i = 0; i<hand.length; i++) {
+        for (let j = jStart; j<hand.length; j++){
+            if (i!==j) {
+                if (hand[i].suitVal === hand[j].suitVal) {
+                    const matchingSuits = hand.filter(card => card.suitVal === hand[i].suitVal);
+                    if (matchingSuits.length >= 5) {
+                        matchingSuits.map(card => {
+                            if (card.comboStatus.playerColors.indexOf(playerColorList[forWhichPlayer]) === -1) {
+                                card.comboStatus.playerColors.push(playerColorList[forWhichPlayer])
+                            }
+                            if (card.comboStatus.playerColors.length === 6) {
+                                card.comboStatus.playerColors.push('purple');
+                            }
+                            return card.comboStatus.status === true;
+                        });
+                        return 5;
+                    }
                 }
             }
-            deckIndex++;
+        }
+        jStart++;
+    }
+    return false;
+};
+
+const checkFullHouse = (hand) => {
+    let jStart = 0;
+    let setCaught = false;
+    let pairCaught = false;
+    for (let i = 0; i<hand.length; i++) {
+        for (let j = jStart; j<hand.length; j++){
+            if (i!==j) {
+                if (hand[i].strength === hand[j].strength) {
+                    const matchingCards = hand.filter(card => card.strength === hand[i].strength);
+                    if (matchingCards.length === 3) {
+                        setCaught = true;
+                    }
+                    if (matchingCards.length === 2) {
+                        pairCaught = true;
+                    }
+                    if (setCaught && pairCaught) {
+                        return 6;
+                    }
+                }
+            }
+        }
+        jStart++;
+    }
+    return false;
+};
+
+const checkSetOrQuad = (hand, forWhichPlayer) => {
+    let jStart = 0;
+    for (let i = 0; i<hand.length; i++) {
+        for (let j = jStart; j<hand.length; j++){
+            if (i!==j) {
+                if (hand[i].strength === hand[j].strength) {
+                    const matchingCards = hand.filter(card => card.strength === hand[i].strength);
+                    if (matchingCards.length === 3) {
+                        return 3;
+                    }
+                    if (matchingCards.length === 4) {
+                        return 7;
+                    }
+                }
+            }
+        }
+        jStart++;
+    }
+    return false;
+};
+
+const parseCards = (forWhichPlayer, deck, state) => {
+    const { players } = state;
+    let playerNumber = forWhichPlayer;
+    if (forWhichPlayer !== 0) {
+        playerNumber = playerNumber + playerNumber;
+    }
+    const indexOfTableCards = players.length * 2;
+    const tableCards = deck.slice(indexOfTableCards, indexOfTableCards + 5);
+    const dealtToPlayer = deck.slice(playerNumber, playerNumber + 2);
+    const hand = dealtToPlayer.concat(tableCards);
+
+    let setCandidate;
+    let setSuccess = [];
+    let jStart = 0;
+
+    for (let i = 0; i < 7; i++) {
+        for (let j = jStart; j < 7; j++) {
+            if (i !== j) {
+                if (players[forWhichPlayer].combo.comboRank === 0) {
+                    players[forWhichPlayer].combo.comboStrength = checkHighestCard(hand);
+                }
+                if (hand[i].value === hand[j].value) {
+
+                    setCandidate = hand[i].value;
+                    setSuccess = setSuccess.concat(hand.filter(item => item.value === setCandidate));
+
+                    const handShortOfI = hand[i].comboStatus.playerColors;
+                    const handShortOfJ = hand[j].comboStatus.playerColors;
+
+                    if (i > 1) {
+                        if (handShortOfI.indexOf('purple') === -1) {
+                            hand[i].comboStatus.status = true;
+                            handShortOfI.push('purple')
+                        }
+                        if (handShortOfJ.indexOf('purple') === -1) {
+                            hand[j].comboStatus.status = true;
+                            handShortOfJ.push('purple')
+                        }
+                    } else {
+                        hand[i].comboStatus.status = true;
+                        if (handShortOfI.indexOf(playerColorList[forWhichPlayer]) === -1) {
+                            handShortOfI.push(playerColorList[forWhichPlayer])
+                        }
+
+                        hand[j].comboStatus.status = true;
+                        if (handShortOfJ.indexOf(playerColorList[forWhichPlayer]) === -1) {
+                            handShortOfJ.push(playerColorList[forWhichPlayer])
+                        }
+                    }
+                    if (players[forWhichPlayer].combo.comboRank < 2) {
+                        players[forWhichPlayer].combo.comboRank += 1;
+                    }
+                    players[forWhichPlayer].combo.comboStrength = checkHighestCard(searchForUniqueCardsWithCombo(hand));
+                }
+            }
+        }
+        jStart++;
+    }
+
+    const setOrQuadResult = checkSetOrQuad(hand, forWhichPlayer);
+    const straightResult = checkStraight(hand, forWhichPlayer);
+    const flushResult = checkFlush(hand, forWhichPlayer);
+    const fullHouseResult = checkFullHouse(hand);
+
+    if (setOrQuadResult) {
+        players[forWhichPlayer].combo.comboRank = setOrQuadResult;
+    }
+    if (straightResult) {
+        players[forWhichPlayer].combo.comboRank = straightResult;
+    }
+    if (flushResult) {
+        players[forWhichPlayer].combo.comboRank = flushResult;
+    }
+    if (fullHouseResult) {
+        players[forWhichPlayer].combo.comboRank = fullHouseResult;
+    }
+    if (straightResult && flushResult) {
+        if (hand[6].strength === 14) {
+            players[forWhichPlayer].combo.comboRank = 9;
+        } else {
+            players[forWhichPlayer].combo.comboRank = 8;
         }
     }
-    return deckTemp;
-}
-
-const shuffle = array => {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
 }
