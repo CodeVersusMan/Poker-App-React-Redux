@@ -1,6 +1,4 @@
 import React from 'react';
-/*import Opener from './custom/opener.js';
-import Output from './custom/output.js';*/
 import BetMenuButton from './BetMenuButton.js'
 
 const BetMenu = ({makeBet, player}) => {
@@ -21,12 +19,3 @@ const BetMenu = ({makeBet, player}) => {
     </div>
 } 
 export default BetMenu;
-
-/*{ const values = [
-    "why", "are ", "we", "still", "here"
-]; }
-
-{ <div className = "select-output-wrap">
-        < Output values={values} />
-        < Opener />
-    </div> }*/

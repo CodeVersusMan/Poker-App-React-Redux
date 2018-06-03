@@ -5,10 +5,8 @@ const setInitState = (amountOfPlayers) => {
             id: i,
             playerName: 'Player ' + (i+1),
             playerChips: 1500,
-            combo: {
-                comboStrength: 0,
-                comboRank: 0
-            }
+            hand: [],
+            comboRank: 0
         })
     }
     return {

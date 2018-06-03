@@ -1,7 +1,5 @@
 import React from 'react';
-
 const BetMenuButton = ({task, handleClick}) => {
-
     return handleClick ? (
         <div 
             onClick={handleClick} 
@@ -14,5 +12,5 @@ const BetMenuButton = ({task, handleClick}) => {
             {task}
         </div>
     )
-} 
+};
 export default BetMenuButton;

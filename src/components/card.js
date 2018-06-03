@@ -1,13 +1,14 @@
 import React from 'react';
-const Card = ({enterAt, value, suit, comboStatus}) => {
+import { suits } from '../reducers/suitsAndValues'
+const Card = ({enterAt, value, suit, playerColors}) => {
     let classList = ['card'];
     let suitClass;
 
     enterAt ? classList.push('visible') : classList.push('invisible')
 
-    if (suit === '\u2666') {
+    if (suits[suit] === '\u2666') {
         suitClass = 'suit-red';
-    } else if (suit === '\u2665') {
+    } else if (suits[suit] === '\u2665') {
         suitClass = 'suit-red';
     } else {
         suitClass = 'suit-black';
@@ -16,13 +17,9 @@ const Card = ({enterAt, value, suit, comboStatus}) => {
     return (
         <div className={classList.join(' ')}>
             <span>{value}</span>
-            <span className={suitClass}>{suit}</span>
+            <span className={suitClass}>{suits[suit]}</span>
             <div className="matches">
-                {comboStatus.playerColors.map((color, index) => {
-                    return <div key={index} className={"match-block " + color}>
-
-                    </div>
-                })}
+                {playerColors.map((color, index) => <div key={index} className={"match-block " + color}></div>)}
             </div>
         </div> 
     );

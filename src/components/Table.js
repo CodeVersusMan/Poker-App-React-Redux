@@ -1,7 +1,7 @@
 import React from 'react';
-import Card from './card.js'
-import ButtonContainer from '../containers/ButtonContainer.js'
-import PotContainer from '../containers/PotContainer.js'
+import Card from './Card'
+import { ButtonContainer } from '../containers/ButtonContainer'
+import { PotContainer } from '../containers/PotContainer'
 
 const Table = ({deck, enterAt, players}) => {
     const startDeal = players.length * 2;

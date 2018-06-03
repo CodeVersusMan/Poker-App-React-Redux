@@ -1,6 +1,6 @@
 import React from 'react';
-import Card from './card';
-import BetMenuContainer from '../containers/BetMenuContainer';
+import Card from './Card';
+import { BetMenuContainer } from '../containers/BetMenuContainer';
 
 const Player = ({id, deck, enterAt, player, playerSeatPosition}) => {
     let startDeal = playerSeatPosition;

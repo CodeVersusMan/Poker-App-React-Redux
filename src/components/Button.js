@@ -1,5 +1,3 @@
 import React from 'react';
-const Button = ({nextTurn}) => {
-    return <div onClick={nextTurn} className="button"></div>
-}
+const Button = ({nextTurn}) => <div onClick={nextTurn} className="button"></div>
 export default Button;
