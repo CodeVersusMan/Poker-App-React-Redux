@@ -46,31 +46,68 @@ const checkWinner = (state) => {
 
     const { pot, enterAt, players } = state;
 
-    let maxRank = players[0].comboRank;
-    let maxPlayer = players[0];
-    let winner = players[0];
-    let winnerIndex = 0;
-
-    for (let i = 0; i < players.length; i++) {
-        if (players[i].comboRank > maxRank) {
-            maxRank = players[i].comboRank
-            maxPlayer = players[i];
-            winner = players[i];
-            winnerIndex = i;
-        } else if (players[i].comboRank === maxRank) {
-            for (let x = 0; x < 7; x++) {
-                for (let j = 0; j < 7; j++) {
-                    if (players[i].hand[x].strength > maxPlayer.hand[j].strength) {
-                        maxPlayer = players[i];
-                        winner = players[i];
-                        winnerIndex = i;
-                    }
-                }
-            } 
-        }
+    let winnerId = 0;
+    
+    let listOfRanks = [];
+    for (let i = 0; i<players.length; i++) {
+        listOfRanks[i] = players[i].comboRank 
     }
 
-    alert(winner.playerName + ' won!')
+    const maxRankFromList = listOfRanks.reduce((a, b) => Math.max(a, b));
+
+    let newRanksFiltered = listOfRanks.filter(rank => rank === maxRankFromList)
+
+    if (newRanksFiltered.length === 1) {
+        const indexOfWinnerPlayer = listOfRanks.indexOf(maxRankFromList);
+        winnerId = players[indexOfWinnerPlayer].id;
+        alert(players[indexOfWinnerPlayer].playerName + ' won!')
+    } else {
+
+        let winCandidatesIndexes = [];
+        for (let i = 0; i < listOfRanks.length; i++) {
+            if (listOfRanks[i] === maxRankFromList){
+                winCandidatesIndexes.push(i);
+            }
+        }
+        let newPlayerList = [];
+        for (let i = 0; i < winCandidatesIndexes.length; i++) {
+            newPlayerList[i] = players[winCandidatesIndexes[i]] 
+        }
+
+        let strengthList = [];
+        let allStrengths = [];
+
+        for (let i = 0; i<newPlayerList.length; i++) {
+            strengthList = newPlayerList[i].hand.map(card => card.strength);
+            strengthList.sort((a, b) => b - a);
+            allStrengths.push(strengthList);
+        }
+
+        let checkCounter = 0;
+
+        const determineWinner = () => {
+            if (checkCounter > 6) {
+                alert('Stalemate')
+                return;
+            }
+            let checkMaxStrengthInList = [];
+            for (let i = 0; i<newPlayerList.length; i++) {
+                checkMaxStrengthInList.push(allStrengths[i][checkCounter]);  
+            }
+            const maxStrengthFromList = checkMaxStrengthInList.reduce((a, b) => Math.max(a, b));
+            let newStrengthsFiltered = checkMaxStrengthInList.filter(strength => strength === maxStrengthFromList)
+            if (newStrengthsFiltered.length === 1) {
+                const indexOfWinnerPlayer = checkMaxStrengthInList.indexOf(maxStrengthFromList);
+                winnerId = newPlayerList[indexOfWinnerPlayer].id;
+                alert(newPlayerList[indexOfWinnerPlayer].playerName + ' won with higher combo!')
+            } else {
+                checkCounter++;
+                console.log(checkCounter)
+                determineWinner();
+            }
+        }
+        determineWinner();
+    }
 
     return {
         ...state,
@@ -79,7 +116,7 @@ const checkWinner = (state) => {
         }))),
         players: players.map((player, index) => {
             player.comboRank = 0            
-            if (index === winnerIndex) {
+            if (index === winnerId) {
                 return {
                     ...player,
                     playerChips: player.playerChips + pot
@@ -121,49 +158,77 @@ const checkStraight = (hand, forWhichPlayer, players) => {
     return false;
 };
 
-const checkFlush = (i, j, hand, forWhichPlayer, players) => {
-    if (hand[i].suit === hand[j].suit) {
-        const matchingSuits = hand.filter(card => card.suit === hand[i].suit);
-        if (matchingSuits.length >= 5) {
-            matchingSuits.map((card, index) => {
-                if (card.playerColors.indexOf(playerColorList[forWhichPlayer]) === -1) {
-                    card.playerColors.push(playerColorList[forWhichPlayer])
+const checkFlush = (hand, forWhichPlayer, players) => {
+    let jStart = 0;
+    for (let i = 0; i < 7; i++) {
+        for (let j = jStart; j < 7; j++) {
+            if (i !== j) {
+                if (hand[i].suit === hand[j].suit) {
+                    const matchingSuits = hand.filter(card => card.suit === hand[i].suit);
+                    if (matchingSuits.length >= 5) {
+                        matchingSuits.map((card, index) => {
+                            if (card.playerColors.indexOf(playerColorList[forWhichPlayer]) === -1) {
+                                card.playerColors.push(playerColorList[forWhichPlayer])
+                            }
+                            if (card.playerColors.length >= 6) {
+                                card.playerColors.push('purple');
+                            }
+                            players[forWhichPlayer].hand[index].strength = players[forWhichPlayer].hand[index].strength * 10;
+                            return card;
+                        });
+                        return 5;
+                    }
                 }
-                if (card.playerColors.length >= 6) {
-                    card.playerColors.push('purple');
-                }
-                players[forWhichPlayer].hand[index].strength = players[forWhichPlayer].hand[index].strength * 10;
-                return card;
-            });
-            return 5;
+            }
         }
+        jStart++;
     }
     return false;
 };
 
-const checkFullHouse = (i, hand) => {
+const checkFullHouse = (hand) => {
+    let jStart = 0;
     let setCaught = false;
     let pairCaught = false;
-    const matchingCards = hand.filter(card => card.strength === hand[i].strength);
-    if (matchingCards.length === 3) {
-        setCaught = true;
-    }
-    if (matchingCards.length === 2) {
-        pairCaught = true;
-    }
-    if (setCaught && pairCaught) {
-        return 6;
+    for (let i = 0; i < 7; i++) {
+        for (let j = jStart; j < 7; j++) {
+            if (i !== j) {
+                if (hand[i].value === hand[j].value) {
+                    const matchingCards = hand.filter(card => card.strength === hand[i].strength);
+                    if (matchingCards.length === 3) {
+                        setCaught = true;
+                    }
+                    if (matchingCards.length === 2) {
+                        pairCaught = true;
+                    }
+                    if (setCaught && pairCaught) {
+                        return 6;
+                    }
+                }
+            }
+        }
+        jStart++;
     }
     return false;
 };
 
-const checkSetOrQuad = (i, hand) => {
-    const matchingCards = hand.filter(card => card.strength === hand[i].strength);
-    if (matchingCards.length === 3) {
-        return 3;
-    }
-    if (matchingCards.length === 4) {
-        return 7;
+const checkSetOrQuad = (hand) => {
+    let jStart = 0;
+    for (let i = 0; i < 7; i++) {
+        for (let j = jStart; j < 7; j++) {
+            if (i !== j) {
+                if (hand[i].value === hand[j].value) {
+                    const matchingCards = hand.filter(card => card.strength === hand[i].strength);
+                    if (matchingCards.length === 3) {
+                        return 3;
+                    }
+                    if (matchingCards.length === 4) {
+                        return 7;
+                    }
+                }
+            }
+        }
+        jStart++;
     }
     return false;
 };
@@ -197,30 +262,27 @@ const parseCards = (forWhichPlayer, deck, players) => {
     const tableCards = deck.slice(indexOfTableCards, indexOfTableCards + 5);
     const dealtToPlayer = deck.slice(playerNumber, playerNumber + 2);
     const hand = dealtToPlayer.concat(tableCards);
-    players[forWhichPlayer].hand = JSON.parse(JSON.stringify(hand))
+    players[forWhichPlayer].hand = JSON.parse(JSON.stringify(hand));
 
-    let setOrQuadResult;
-    let flushResult
-    let fullHouseResult;
     let jStart = 0;
 
     for (let i = 0; i < 7; i++) {
         for (let j = jStart; j < 7; j++) {
             if (i !== j) {
-                flushResult = checkFlush(i, j, hand, forWhichPlayer, players);
                 if (hand[i].value === hand[j].value) {
-                    setOrQuadResult = checkSetOrQuad(i, hand);
-                    fullHouseResult = checkFullHouse(i, hand);
-                    applyStyles(i, j, hand, forWhichPlayer, players);
                     if (players[forWhichPlayer].comboRank < 2) {
                         players[forWhichPlayer].comboRank += 1;
                     }
+                    applyStyles(i, j, hand, forWhichPlayer, players);
                 }
             }
         }
         jStart++;
     }
+    const setOrQuadResult = checkSetOrQuad(hand);
     const straightResult = checkStraight(hand, forWhichPlayer, players);
+    const flushResult = checkFlush(hand, forWhichPlayer, players);
+    const fullHouseResult = checkFullHouse(hand);
 
     if (setOrQuadResult) {
         players[forWhichPlayer].comboRank = setOrQuadResult;
