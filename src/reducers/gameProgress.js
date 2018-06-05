@@ -47,7 +47,7 @@ const checkWinner = (state) => {
     const { pot, enterAt, players } = state;
 
     let winnerId = 0;
-    
+
     let listOfRanks = [];
     for (let i = 0; i<players.length; i++) {
         listOfRanks[i] = players[i].comboRank 
@@ -55,14 +55,13 @@ const checkWinner = (state) => {
 
     const maxRankFromList = listOfRanks.reduce((a, b) => Math.max(a, b));
 
-    let newRanksFiltered = listOfRanks.filter(rank => rank === maxRankFromList)
+    const newRanksFiltered = listOfRanks.filter(rank => rank === maxRankFromList)
 
     if (newRanksFiltered.length === 1) {
         const indexOfWinnerPlayer = listOfRanks.indexOf(maxRankFromList);
         winnerId = players[indexOfWinnerPlayer].id;
         alert(players[indexOfWinnerPlayer].playerName + ' won!')
     } else {
-
         let winCandidatesIndexes = [];
         for (let i = 0; i < listOfRanks.length; i++) {
             if (listOfRanks[i] === maxRankFromList){
@@ -91,18 +90,21 @@ const checkWinner = (state) => {
                 return;
             }
             let checkMaxStrengthInList = [];
-            for (let i = 0; i<newPlayerList.length; i++) {
+            for (let i = 0; i<allStrengths.length; i++) {
                 checkMaxStrengthInList.push(allStrengths[i][checkCounter]);  
             }
             const maxStrengthFromList = checkMaxStrengthInList.reduce((a, b) => Math.max(a, b));
-            let newStrengthsFiltered = checkMaxStrengthInList.filter(strength => strength === maxStrengthFromList)
+            const newStrengthsFiltered = checkMaxStrengthInList.filter(strength => strength === maxStrengthFromList);
+            for (let i = 0; i<allStrengths.length; i++) {
+                if (allStrengths[i][checkCounter] !== newStrengthsFiltered[0])
+                    allStrengths.splice(i, 1);
+            }
             if (newStrengthsFiltered.length === 1) {
                 const indexOfWinnerPlayer = checkMaxStrengthInList.indexOf(maxStrengthFromList);
                 winnerId = newPlayerList[indexOfWinnerPlayer].id;
                 alert(newPlayerList[indexOfWinnerPlayer].playerName + ' won with higher combo!')
             } else {
                 checkCounter++;
-                console.log(checkCounter)
                 determineWinner();
             }
         }
@@ -253,6 +255,32 @@ const applyStyles = (i, j, hand, forWhichPlayer, players) => {
     }
 }
 
+const checkMatchingCards = (hand, forWhichPlayer, players) => {
+    let jStart = 0;
+    let matchingCards = [];
+    for (let i = 0; i < 7; i++) {
+        for (let j = jStart; j < 7; j++) {
+            if (i !== j) {
+                if (hand[i].value === hand[j].value) {
+                    matchingCards.push(hand[i]);
+                    if (players[forWhichPlayer].comboRank < 2) {
+                        players[forWhichPlayer].comboRank += 1;
+                    }
+                    applyStyles(i, j, hand, forWhichPlayer, players);
+                }
+            }
+        }
+        jStart++;
+    }
+
+    if (matchingCards.length === 3) {
+        const matchingStrengths =  matchingCards.map(card => card = card.strength);
+        const weakestPairStrength = Math.min(...matchingStrengths);
+        const weakestPair = players[forWhichPlayer].hand.filter((card) => card.strength === weakestPairStrength * 10);
+        weakestPair.map(card => card.strength = card.strength / 10);
+    }
+};
+
 const parseCards = (forWhichPlayer, deck, players) => {
     let playerNumber = forWhichPlayer;
     if (forWhichPlayer !== 0) {
@@ -264,21 +292,8 @@ const parseCards = (forWhichPlayer, deck, players) => {
     const hand = dealtToPlayer.concat(tableCards);
     players[forWhichPlayer].hand = JSON.parse(JSON.stringify(hand));
 
-    let jStart = 0;
+    checkMatchingCards(hand, forWhichPlayer, players);
 
-    for (let i = 0; i < 7; i++) {
-        for (let j = jStart; j < 7; j++) {
-            if (i !== j) {
-                if (hand[i].value === hand[j].value) {
-                    if (players[forWhichPlayer].comboRank < 2) {
-                        players[forWhichPlayer].comboRank += 1;
-                    }
-                    applyStyles(i, j, hand, forWhichPlayer, players);
-                }
-            }
-        }
-        jStart++;
-    }
     const setOrQuadResult = checkSetOrQuad(hand);
     const straightResult = checkStraight(hand, forWhichPlayer, players);
     const flushResult = checkFlush(hand, forWhichPlayer, players);
