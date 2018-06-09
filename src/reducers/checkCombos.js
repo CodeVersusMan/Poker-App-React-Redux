@@ -42,6 +42,20 @@ const parseCards = (forWhichPlayer, deck, players) => {
     }
 }
 
+const loopThroughAllCards = (hand, lookFor) => {
+    let jStart = 0;
+    for (let i = 0; i < 7; i++) {
+        for (let j = jStart; j < 7; j++) {
+            if (i !== j) {
+                if (hand[i].lookFor === hand[j].lookFor) {
+
+                }
+            }
+        }
+        jStart++;
+    }
+}
+
 const checkStraight = (hand, forWhichPlayer, players) => {
     const sortedHand = hand.map(card => card.strength).sort((a, b) => a - b);
     const startingElement = sortedHand.map((card, index) => {

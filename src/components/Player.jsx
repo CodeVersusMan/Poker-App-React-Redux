@@ -10,9 +10,7 @@ const Player = ({id, deck, enterAt, player, playerSeatPosition}) => {
     const playerHand = deck.slice(startDeal, startDeal+2);
     return (
         <div id={id} className="player">
-            <div className="player-hand">
-                {playerHand.map(card => <Card key={card.id} {...card} enterAt={enterAt.deal} />)}
-            </div>
+            {playerHand.map(card => <Card key={card.id} {...card} enterAt={enterAt.deal} />)}
             < BetMenuContainer player={player} />
         </div> 
     );
