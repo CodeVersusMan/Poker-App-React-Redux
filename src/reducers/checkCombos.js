@@ -2,7 +2,6 @@ import { playerColorList } from './playerColorList'
 export const checkCombos = (deck, players) => {
     players.forEach((player, index) => parseCards(index, deck, players));
 }
-
 const parseCards = (forWhichPlayer, deck, players) => {
     let playerNumber = forWhichPlayer;
     if (forWhichPlayer !== 0) {
@@ -14,12 +13,19 @@ const parseCards = (forWhichPlayer, deck, players) => {
     const hand = dealtToPlayer.concat(tableCards);
     players[forWhichPlayer].hand = JSON.parse(JSON.stringify(hand));
 
-    checkMatchingCards(hand, forWhichPlayer, players);
+    const currentPlayer = {
+        player: players[forWhichPlayer],
+        playerHand: players[forWhichPlayer].hand,
+        parsedHand: hand, 
+        playerColors: playerColorList[forWhichPlayer],
+    }
 
-    const setOrQuadResult = checkSetOrQuad(hand);
-    const straightResult = checkStraight(hand, forWhichPlayer, players);
-    const flushResult = checkFlush(hand, forWhichPlayer, players);
-    const fullHouseResult = checkFullHouse(hand);
+    checkMatchingCards(currentPlayer);
+
+    const setOrQuadResult = loopThroughAllCards(currentPlayer, 'value', checkSetOrQuad);
+    const straightResult = checkStraight(currentPlayer);
+    const flushResult = loopThroughAllCards(currentPlayer, 'suit', checkFlush);
+    const fullHouseResult = checkFullHouse(currentPlayer);
 
     if (setOrQuadResult) {
         players[forWhichPlayer].comboRank = setOrQuadResult;
@@ -34,7 +40,7 @@ const parseCards = (forWhichPlayer, deck, players) => {
         players[forWhichPlayer].comboRank = fullHouseResult;
     }
     if (straightResult && flushResult) {
-        if (hand[6].strength % 14 === 0) {
+        if (hand[6].strength === 140) {
             players[forWhichPlayer].comboRank = 9;
         } else {
             players[forWhichPlayer].comboRank = 8;
@@ -42,39 +48,73 @@ const parseCards = (forWhichPlayer, deck, players) => {
     }
 }
 
-const loopThroughAllCards = (hand, lookFor) => {
+const loopThroughAllCards = (currentPlayer, lookFor, typeOfCombo) => {
+    const { parsedHand } = currentPlayer;
+    let result;
     let jStart = 0;
     for (let i = 0; i < 7; i++) {
         for (let j = jStart; j < 7; j++) {
             if (i !== j) {
-                if (hand[i].lookFor === hand[j].lookFor) {
-
+                if (parsedHand[i][lookFor] === parsedHand[j][lookFor]) {
+                    result = typeOfCombo(currentPlayer, i, j)
+                    if (result) return result;
                 }
             }
         }
         jStart++;
     }
+    return false;
+};
+
+const checkMatchingCards = (currentPlayer) => {
+    const { parsedHand, playerHand, player } = currentPlayer;
+    let jStart = 0;
+    let matchingCards = [];
+    for (let i = 0; i < 7; i++) {
+        for (let j = jStart; j < 7; j++) {
+            if (i !== j) {
+                if (parsedHand[i].value === parsedHand[j].value) {
+                    matchingCards.push(parsedHand[i]);
+                    if (player.comboRank < 2) player.comboRank += 1;
+                    applyStyles(i, j, currentPlayer);
+                }
+            }
+        }
+        jStart++;
+    }
+    if (matchingCards.length === 3) preventThirdPair(matchingCards, playerHand);
+};
+
+const preventThirdPair = (matchingCards, playerHand) => {
+    const matchingStrengths =  matchingCards.map(card => card = card.strength);
+    const weakestPairStrength = Math.min(...matchingStrengths);
+    const weakestPair = playerHand.filter(card => card.strength === weakestPairStrength * 10);
+    weakestPair.map(card => card.strength = card.strength / 10);
 }
 
-const checkStraight = (hand, forWhichPlayer, players) => {
-    const sortedHand = hand.map(card => card.strength).sort((a, b) => a - b);
+const checkSetOrQuad = ({ parsedHand }, i) => {
+    const matchingCards = parsedHand.filter(card => card.strength === parsedHand[i].strength);
+    if (matchingCards.length === 3) return 3;
+    if (matchingCards.length === 4) return 7;
+};
+
+const checkStraight = ({parsedHand, playerHand, playerColors}) => {
+    const sortedHand = parsedHand.map(card => card.strength).sort((a, b) => a - b);
     const startingElement = sortedHand.map((card, index) => {
         for (let i = 1; i<5; i++) {
-            if (card + i !== sortedHand[index+i]) {
-                return null;
-            }
+            if (card + i !== sortedHand[index+i]) return null;
         }
         return index;
     }).filter(item => item !== null);
     if (startingElement[0] !== undefined) {
-        players[forWhichPlayer].hand.map(card => card.strength > 14 ? card.strength = card.strength / 10 : card.strength);
+        playerHand.map(card => card.strength > 14 ? card.strength = card.strength / 10 : card.strength);
         const x = startingElement[0];
         const straightValues = sortedHand.slice(x, x+5);
         straightValues.map(value => {
-            players[forWhichPlayer].hand.map((card, index) => {
+            playerHand.map((card, index) => {
                 if (card.strength === value) {
-                    if (hand[index].playerColors.indexOf(playerColorList[forWhichPlayer]) === -1) {
-                        hand[index].playerColors.push(playerColorList[forWhichPlayer])
+                    if (parsedHand[index].playerColors.indexOf(playerColors) === -1) {
+                        parsedHand[index].playerColors.push(playerColors)
                     }
                     card.strength = card.strength * 10;
                 }
@@ -84,64 +124,43 @@ const checkStraight = (hand, forWhichPlayer, players) => {
         })
         return 4;
     }
-    return false;
 };
 
-const checkFlush = (hand, forWhichPlayer, players) => {
-    let jStart = 0;
-    for (let i = 0; i < 7; i++) {
-        for (let j = jStart; j < 7; j++) {
-            if (i !== j) {
-                if (hand[i].suit === hand[j].suit) {
-                    const matchingSuits = hand.filter(card => card.suit === hand[i].suit);
-                    if (matchingSuits.length >= 5) {
-                        players[forWhichPlayer].hand.map(card => card.strength > 14 ? card.strength = card.strength / 10 : card.strength);
-                        console.log(players[forWhichPlayer].hand);
-                        matchingSuits.map((matchedCard, index) => {
-                            if (matchedCard.playerColors.indexOf(playerColorList[forWhichPlayer]) === -1) {
-                                matchedCard.playerColors.push(playerColorList[forWhichPlayer])
-                            }
-                            if (matchedCard.playerColors.length >= 6) {
-                                matchedCard.playerColors = ['purple'];
-                            }
-                            players[forWhichPlayer].hand.map(card => {
-                                if (card.id === matchedCard.id) {
-                                    if (card.strength <= 14) {
-                                        card.strength = card.strength * 10;
-                                    }
-                                }
-                                return card;
-                            })
-                            return matchedCard;
-                        });
-                        return 5;
-                    }
-                }
+const checkFlush = ({parsedHand, playerHand, playerColors}, i) => {
+    const matchingSuits = parsedHand.filter(card => card.suit === parsedHand[i].suit);
+    if (matchingSuits.length >= 5) {
+        playerHand.map(card => card.strength > 14 ? card.strength = card.strength / 10 : card.strength);
+        matchingSuits.map((matchedCard, index) => {
+            if (matchedCard.playerColors.indexOf(playerColors) === -1) {
+                matchedCard.playerColors.push(playerColors)
             }
-        }
-        jStart++;
+            if (matchedCard.playerColors.length >= 6) {
+                matchedCard.playerColors = ['purple'];
+            }
+            playerHand.map(card => {
+                if (card.id === matchedCard.id) {
+                    if (card.strength <= 14) card.strength = card.strength * 10;
+                }
+                return card;
+            })
+            return matchedCard;
+        });
+        return 5;
     }
-    return false;
 };
 
-const checkFullHouse = (hand) => {
+const checkFullHouse = ({parsedHand}) => {
     let jStart = 0;
     let setCaught = false;
     let pairCaught = false;
     for (let i = 0; i < 7; i++) {
         for (let j = jStart; j < 7; j++) {
             if (i !== j) {
-                if (hand[i].value === hand[j].value) {
-                    const matchingCards = hand.filter(card => card.strength === hand[i].strength);
-                    if (matchingCards.length === 3) {
-                        setCaught = true;
-                    }
-                    if (matchingCards.length === 2) {
-                        pairCaught = true;
-                    }
-                    if (setCaught && pairCaught) {
-                        return 6;
-                    }
+                if (parsedHand[i].value === parsedHand[j].value) {
+                    const matchingCards = parsedHand.filter(card => card.strength === parsedHand[i].strength);
+                    if (matchingCards.length === 3) setCaught = true;
+                    if (matchingCards.length === 2) pairCaught = true;
+                    if (setCaught && pairCaught) return 6;   
                 }
             }
         }
@@ -150,73 +169,14 @@ const checkFullHouse = (hand) => {
     return false;
 };
 
-const checkSetOrQuad = (hand) => {
-    let jStart = 0;
-    for (let i = 0; i < 7; i++) {
-        for (let j = jStart; j < 7; j++) {
-            if (i !== j) {
-                if (hand[i].value === hand[j].value) {
-                    const matchingCards = hand.filter(card => card.strength === hand[i].strength);
-                    if (matchingCards.length === 3) {
-                        return 3;
-                    }
-                    if (matchingCards.length === 4) {
-                        return 7;
-                    }
-                }
-            }
-        }
-        jStart++;
-    }
-    return false;
-};
-
-const applyStyles = (i, j, hand, forWhichPlayer, players) => {
-    if (players[forWhichPlayer].hand[i].strength <= 14) {
-        players[forWhichPlayer].hand[i].strength = players[forWhichPlayer].hand[i].strength * 10;
-    }
-    if (players[forWhichPlayer].hand[j].strength <= 14) {
-        players[forWhichPlayer].hand[j].strength = players[forWhichPlayer].hand[j].strength * 10;
-    }
+const applyStyles = (i, j, {parsedHand, playerHand, playerColors}) => {
+    if (playerHand[i].strength <= 14) playerHand[i].strength = playerHand[i].strength * 10;
+    if (playerHand[j].strength <= 14) playerHand[j].strength = playerHand[j].strength * 10;
     if (i > 1) {
-        if (hand[i].playerColors.indexOf('purple') === -1) {
-            hand[i].playerColors.push('purple')
-        }
-        if (hand[j].playerColors.indexOf('purple') === -1) {
-            hand[j].playerColors.push('purple')
-        }
+        if (parsedHand[i].playerColors.indexOf('purple') === -1) parsedHand[i].playerColors.push('purple');
+        if (parsedHand[j].playerColors.indexOf('purple') === -1) parsedHand[j].playerColors.push('purple');
     } else {
-        if (hand[i].playerColors.indexOf(playerColorList[forWhichPlayer]) === -1) {
-            hand[i].playerColors.push(playerColorList[forWhichPlayer])
-        }
-        if (hand[j].playerColors.indexOf(playerColorList[forWhichPlayer]) === -1) {
-            hand[j].playerColors.push(playerColorList[forWhichPlayer])
-        }
+        if (parsedHand[i].playerColors.indexOf(playerColors) === -1) parsedHand[i].playerColors.push(playerColors);
+        if (parsedHand[j].playerColors.indexOf(playerColors) === -1) parsedHand[j].playerColors.push(playerColors);
     }
 }
-
-const checkMatchingCards = (hand, forWhichPlayer, players) => {
-    let jStart = 0;
-    let matchingCards = [];
-    for (let i = 0; i < 7; i++) {
-        for (let j = jStart; j < 7; j++) {
-            if (i !== j) {
-                if (hand[i].value === hand[j].value) {
-                    matchingCards.push(hand[i]);
-                    if (players[forWhichPlayer].comboRank < 2) {
-                        players[forWhichPlayer].comboRank += 1;
-                    }
-                    applyStyles(i, j, hand, forWhichPlayer, players);
-                }
-            }
-        }
-        jStart++;
-    }
-
-    if (matchingCards.length === 3) {
-        const matchingStrengths =  matchingCards.map(card => card = card.strength);
-        const weakestPairStrength = Math.min(...matchingStrengths);
-        const weakestPair = players[forWhichPlayer].hand.filter((card) => card.strength === weakestPairStrength * 10);
-        weakestPair.map(card => card.strength = card.strength / 10);
-    }
-};

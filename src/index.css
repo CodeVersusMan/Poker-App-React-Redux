@@ -173,6 +173,7 @@ p {
     background-color: #8CA7BB;
     border: 2px solid white;
     margin-bottom: 5vmin;
+    transform: translate(-21vmax, -21vmin);
 }
 
 .player-wrap {
@@ -198,7 +199,11 @@ p {
     display: -o-flex;
     display: flex;
     flex-flow: row wrap;
-    justify-content: space-around;
+    justify-content: space-between;
+}
+
+.active-player {
+    box-shadow: 10px 10px 15px #8CA7BB;
 }
 
 .pot {

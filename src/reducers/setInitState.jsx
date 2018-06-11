@@ -18,7 +18,8 @@ const setInitState = (amountOfPlayers) => {
         },
         deck: [],
         pot: 0,
-        players: listOfPlayers
+        players: listOfPlayers,
+        currentlyActingPlayer: null
     }
 }
 

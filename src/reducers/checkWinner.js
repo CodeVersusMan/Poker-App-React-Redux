@@ -26,22 +26,9 @@ export const checkWinner = state => {
             const topStrengthsFiltered = listOfTopStrengths.filter(strength => strength === maxValue);
             allStrengths = allStrengths.filter(strength => strength[checkCounter] === maxValue);
             newPlayerList = newPlayerList.filter(player => {
-                /*
-
-                Test this later
-
-                listOfTopStrengths.forEach(strength => {
-                    player.hand.forEach(card => {
-                        if (card.strength === strength) {
-                            return true;
-                        }
-                    })
-                })*/
                 for (let j = 0; j<listOfTopStrengths.length; j++) {
                     for (let i = 0; i<player.hand.length; i++) {
-                        if (player.hand[i].strength === listOfTopStrengths[j]) {
-                            return true;
-                        } 
+                        if (player.hand[i].strength === listOfTopStrengths[j]) return true; 
                     }
                 }
                 return false;
