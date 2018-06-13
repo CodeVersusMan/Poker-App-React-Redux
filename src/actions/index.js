@@ -3,4 +3,12 @@ export const makeBet = (amount, player) => ({
     amount,
     player
 });
+export const makeCall = player => ({
+    type: 'MAKE_CALL',
+    player
+});
+export const foldCards = player => ({
+    type: 'FOLD_CARDS',
+    player
+});
 export const nextTurn = () => ({type: 'NEXT_TURN'});

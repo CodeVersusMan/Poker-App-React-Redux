@@ -4,12 +4,14 @@ import { BetMenuContainer } from '../containers/BetMenuContainer';
 
 const Player = ({ deck, enterAt, player, playerSeatPosition, currentlyActingPlayer }) => {
     let startDeal = playerSeatPosition;
-    if (playerSeatPosition !== 0) {
-        startDeal += startDeal;
-    }
+    if (playerSeatPosition !== 0) startDeal += startDeal;
     const playerHand = deck.slice(startDeal, startDeal+2);
+
+    let playerClassList = ['player'];
+    if (currentlyActingPlayer === player.id) playerClassList.push('active-player');
+    if (player.fold) playerClassList.push('folded');
     return (
-        <div className={currentlyActingPlayer === player.id ? "player active-player" : "player"}>
+        <div className={playerClassList.join(' ')}>
             {playerHand.map(card => <Card key={card.id} {...card} enterAt={enterAt.deal} />)}
             < BetMenuContainer player={player} />
         </div> 

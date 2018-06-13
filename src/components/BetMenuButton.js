@@ -1,8 +1,8 @@
 import React from 'react';
-const BetMenuButton = ({task, handleClick}) => {
+const BetMenuButton = ({ task, handleClick }) => {
     return handleClick ? (
         <div 
-            onClick={handleClick} 
+            onClick={handleClick}
             className="bet-menu_button"
             >
             {task}

@@ -6,7 +6,8 @@ const setInitState = (amountOfPlayers) => {
             playerName: 'Player ' + (i+1),
             playerChips: 1500,
             hand: [],
-            comboRank: 0
+            comboRank: 0,
+            fold: false
         })
     }
     return {
@@ -19,6 +20,8 @@ const setInitState = (amountOfPlayers) => {
         deck: [],
         pot: 0,
         players: listOfPlayers,
+        activePlayersThisRound: listOfPlayers,
+        betAmountThisRound: 0,
         currentlyActingPlayer: null
     }
 }

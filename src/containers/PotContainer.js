@@ -1,3 +1,9 @@
 import Pot from '../components/Pot.js';
 import { connect } from 'react-redux';
-export const PotContainer = connect(state => ({pot: state.pot}))(Pot);
+
+const mapStateToProps = state => ({
+    pot: state.pot,
+    betAmountThisRound: state.betAmountThisRound
+});
+
+export const PotContainer = connect(mapStateToProps)(Pot);

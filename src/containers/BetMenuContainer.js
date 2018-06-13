@@ -1,6 +1,7 @@
 import BetMenu from '../components/BetMenu.js';
-import { makeBet } from '../actions/index.js';
+import { makeBet, foldCards, makeCall } from '../actions/index.js';
 import { connect } from 'react-redux';
-export const BetMenuContainer = connect(
-    state => ({currentlyActingPlayer: state.currentlyActingPlayer}), { makeBet }
-)(BetMenu);
+
+const mapStateToProps = state => ({currentlyActingPlayer: state.currentlyActingPlayer});
+
+export const BetMenuContainer = connect(mapStateToProps, { makeBet, foldCards, makeCall })(BetMenu);

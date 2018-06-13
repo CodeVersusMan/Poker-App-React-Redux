@@ -50,6 +50,7 @@ export const checkWinner = state => {
             [key]: false
         }))),
         players: players.map((player, index) => {
+            player.fold = false;
             player.comboRank = 0            
             if (index === winnerId) {
                 return {
@@ -58,6 +59,7 @@ export const checkWinner = state => {
                 };
             } else return player;
         }),
-        pot: 0
+        pot: 0,
+        betAmountThisRound: 0
     };
 };
