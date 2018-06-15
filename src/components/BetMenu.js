@@ -1,11 +1,11 @@
 import React from 'react';
 import BetMenuButton from './BetMenuButton.js'
 
-const BetMenu = ({ makeBet, foldCards, makeCall, player, currentlyActingPlayer }) => {
+const BetMenu = ({ makeBet, foldCards, makeCall, player, currentlyActingPlayer, betAmountThisRound }) => {
     let input;
     const handleBet = () => {
         if (currentlyActingPlayer === player.id) {
-            if (input.value !== '') makeBet(input.value, player)
+            if (input.value !== '' && parseInt(input.value, 10) > betAmountThisRound) makeBet(input.value, player)
         }
     };
     const handleCall = () => {
@@ -24,7 +24,7 @@ const BetMenu = ({ makeBet, foldCards, makeCall, player, currentlyActingPlayer }
             <BetMenuButton handleClick={handleCall} task='CALL' />
             <BetMenuButton handleClick={handleFold} task='FOLD' />
         </div>
-        <input ref={(node) => input = node} type='text'></input>
+        <input ref={node => input = node} type='text'></input>
         <p>{player.playerName} chips: {player.playerChips}</p>
     </div>
 } 

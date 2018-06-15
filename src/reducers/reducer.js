@@ -2,6 +2,7 @@ import { initState } from './setInitState'
 import { handleBet } from './handleBet'
 import { handleCall } from './handleCall'
 import { foldCards } from './foldCards'
+import { hidePopUp } from './hidePopUp'
 import { flipCard } from './flipCard'
 
 export const reducer = (state = initState, action) => {
@@ -14,6 +15,8 @@ export const reducer = (state = initState, action) => {
             return handleCall(state, action);
         case 'FOLD_CARDS':
             return foldCards(state, action);
+        case 'HIDE_POP_UP':
+            return hidePopUp(state);
         default:
             return state;
     }

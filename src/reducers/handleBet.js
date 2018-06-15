@@ -4,7 +4,6 @@ export const handleBet = (state, action) => {
     const calculatedChips = player.playerChips - parseInt(amount, 10);
 
     if (calculatedChips <= 0) {
-        alert('ALL IN');
         return {
             ...state,
             pot: pot + player.playerChips,
@@ -14,7 +13,11 @@ export const handleBet = (state, action) => {
                 } else return playerOld;
             }),
             currentlyActingPlayer: player.id + 1,
-            betAmountThisRound: amount
+            betAmountThisRound: amount,
+            popUp: {
+                show: true,
+                payload: `${player.playerName} went all in`
+            }
         };
     }
     return {

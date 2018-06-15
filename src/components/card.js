@@ -1,6 +1,6 @@
 import React from 'react';
 import { suits } from '../reducers/suitsAndValues'
-const Card = ({enterAt, value, suit, playerColors}) => {
+const Card = ({ enterAt, value, suit, playerColors, fold }) => {
     let classList = ['card'];
     let suitClass;
 
@@ -13,6 +13,8 @@ const Card = ({enterAt, value, suit, playerColors}) => {
     } else {
         suitClass = 'suit-black';
     }
+    
+    if (fold) classList.push('folded-cards')
 
     return (
         <div className={classList.join(' ')}>

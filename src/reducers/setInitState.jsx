@@ -22,7 +22,11 @@ const setInitState = (amountOfPlayers) => {
         players: listOfPlayers,
         activePlayersThisRound: listOfPlayers,
         betAmountThisRound: 0,
-        currentlyActingPlayer: null
+        currentlyActingPlayer: null,
+        popUp: {
+            show: false, 
+            payload: ''
+        }
     }
 }
 

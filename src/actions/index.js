@@ -12,3 +12,4 @@ export const foldCards = player => ({
     player
 });
 export const nextTurn = () => ({type: 'NEXT_TURN'});
+export const hidePopUp = () => ({type: 'HIDE_POP_UP'});

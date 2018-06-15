@@ -1,10 +1,9 @@
 export const handleCall = (state, action) => {
     const { player } = action;
     const { pot, players, betAmountThisRound } = state;
-    
+
     const calculatedChips = player.playerChips - parseInt(betAmountThisRound, 10);
     if (calculatedChips <= 0) {
-        alert('ALL IN');
         return {
             ...state,
             pot: pot + player.playerChips,
@@ -13,7 +12,11 @@ export const handleCall = (state, action) => {
                     return { ...playerOld, playerChips: 0 };
                 } else return playerOld;
             }),
-            currentlyActingPlayer: player.id + 1
+            currentlyActingPlayer: player.id + 1,
+            popUp: {
+                show: true,
+                payload: `${player.playerName} went all in`
+            }
         };
     }
     return {

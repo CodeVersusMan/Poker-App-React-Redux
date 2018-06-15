@@ -10,7 +10,7 @@ export const checkWinner = state => {
     if (ranksFiltered.length === 1) {
         indexOfWinnerPlayer = listOfRanks.indexOf(maxRankFromList);
         winnerId = players[indexOfWinnerPlayer].id;
-        alert(players[indexOfWinnerPlayer].playerName + ' won!')
+        //alert(players[indexOfWinnerPlayer].playerName + ' won!')
     } else {
         const winCandidatesIndexes = listOfRanks.map((rank, index) => rank === maxRankFromList ? index : null).filter(item => item !== null);
         let newPlayerList = winCandidatesIndexes.map((item, index) => players[winCandidatesIndexes[index]]);
@@ -18,9 +18,31 @@ export const checkWinner = state => {
         let checkCounter = 0;
         const determineWinner = () => {
             if (checkCounter > 6) {
-                alert('Stalemate')
-                return;
-            }
+                return {
+                    ...state,
+                    enterAt: Object.assign({}, ...Object.keys(enterAt).map(key => ({
+                        [key]: false
+                    }))),
+                    players: players.map(player => {
+                        player.fold = false;
+                        player.comboRank = 0;
+                        return newPlayerList.forEach(newPlayer => {
+                            if (player.id === newPlayer.id) {
+                                return {
+                                    ...player,
+                                    playerChips: player.playerChips + (pot / 2)
+                                };
+                            } else return player;
+                        })  
+                    }),
+                    pot: 0,
+                    betAmountThisRound: 0,
+                    popUp: {
+                        show: true,
+                        payload: 'Stalemate between ' + newPlayerList.map(newPlayer => newPlayer.playerName).join(' and ')
+                    }
+                };
+            };
             const listOfTopStrengths = allStrengths.map(strength => strength[checkCounter]);
             const maxValue = listOfTopStrengths.reduce((a, b) => Math.max(a, b));
             const topStrengthsFiltered = listOfTopStrengths.filter(strength => strength === maxValue);
@@ -36,7 +58,7 @@ export const checkWinner = state => {
             if (topStrengthsFiltered.length === 1) {
                 indexOfWinnerPlayer = listOfTopStrengths.indexOf(maxValue);
                 winnerId = newPlayerList[indexOfWinnerPlayer].id;
-                alert(newPlayerList[indexOfWinnerPlayer].playerName + ' won with higher combo!')
+                //alert(newPlayerList[indexOfWinnerPlayer].playerName + ' won with higher combo!')
             } else {
                 checkCounter++;
                 determineWinner();
@@ -60,6 +82,10 @@ export const checkWinner = state => {
             } else return player;
         }),
         pot: 0,
-        betAmountThisRound: 0
+        betAmountThisRound: 0,
+        popUp: {
+            show: true,
+            payload: `${players[winnerId].playerName} won`
+        }
     };
 };

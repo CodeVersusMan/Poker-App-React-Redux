@@ -87,6 +87,33 @@ p {
     align-items: center;
 }
 
+.pop-up {
+    display: -webkit-flex;
+    display: -moz-flex;
+    display: -ms-flex;
+    display: -o-flex;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    background-color: #8CA7BB;
+    color: white;
+    position: fixed;
+    left: 0;
+    width: 20vmax;
+    height: 15vmin;
+    border: 2px solid white;
+    border-left: none;
+    font-size: 2.5vmin;
+    padding-right: 5vmin;
+    will-change: transform;
+    transform: translate(-20vmax, 0);
+    transition: 0.2s ease-out;
+}
+
+.show-pop-up {
+    transform: translate(0, 0);
+}
+
 .card {
     border: 2px solid white;
     background-color: #8CA7BB;
@@ -102,6 +129,14 @@ p {
     justify-content: center;
     -ms-align-items: center;
     align-items: center;
+    will-change: opacity;
+    will-change: transform;
+}
+
+.folded-cards {
+    transform: translate(0, 3vmin);
+    opacity: 0;
+    transition: .5s ease-out;
 }
 
 .matches {
@@ -185,7 +220,6 @@ p {
     display: -o-flex;
     display: flex;
     flex-flow: row wrap;
-    z-index: 1;
     pointer-events: none;
     align-content: space-between;
     justify-content: space-between;
