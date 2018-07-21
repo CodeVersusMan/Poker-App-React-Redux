@@ -16,6 +16,7 @@ const createDeck = () => {
             deckIndex++;
         }
     }
+    
     return deck;
 }
 

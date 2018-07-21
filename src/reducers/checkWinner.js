@@ -2,6 +2,8 @@ export const checkWinner = state => {
     const { pot, enterAt, players } = state;
     let winnerId = 0;
     let indexOfWinnerPlayer;
+    let stalemate = false;
+    let newPlayerList;
 
     const listOfRanks = players.map(player => player.comboRank);
     const maxRankFromList = listOfRanks.reduce((a, b) => Math.max(a, b));
@@ -10,38 +12,15 @@ export const checkWinner = state => {
     if (ranksFiltered.length === 1) {
         indexOfWinnerPlayer = listOfRanks.indexOf(maxRankFromList);
         winnerId = players[indexOfWinnerPlayer].id;
-        //alert(players[indexOfWinnerPlayer].playerName + ' won!')
     } else {
         const winCandidatesIndexes = listOfRanks.map((rank, index) => rank === maxRankFromList ? index : null).filter(item => item !== null);
-        let newPlayerList = winCandidatesIndexes.map((item, index) => players[winCandidatesIndexes[index]]);
-        let allStrengths = newPlayerList.map(player => player.hand.map(card => card.strength).sort((a, b) => b - a));
+        newPlayerList = winCandidatesIndexes.map((item, index) => players[winCandidatesIndexes[index]]);
+        let allStrengths = newPlayerList.map(player => player.hand.map(card => card.strength).sort((a, b) => b - a).splice(0, 5));
         let checkCounter = 0;
         const determineWinner = () => {
-            if (checkCounter > 6) {
-                return {
-                    ...state,
-                    enterAt: Object.assign({}, ...Object.keys(enterAt).map(key => ({
-                        [key]: false
-                    }))),
-                    players: players.map(player => {
-                        player.fold = false;
-                        player.comboRank = 0;
-                        return newPlayerList.forEach(newPlayer => {
-                            if (player.id === newPlayer.id) {
-                                return {
-                                    ...player,
-                                    playerChips: player.playerChips + (pot / 2)
-                                };
-                            } else return player;
-                        })  
-                    }),
-                    pot: 0,
-                    betAmountThisRound: 0,
-                    popUp: {
-                        show: true,
-                        payload: 'Stalemate between ' + newPlayerList.map(newPlayer => newPlayer.playerName).join(' and ')
-                    }
-                };
+            if (checkCounter > 4) {
+                stalemate = true;
+                return false; 
             };
             const listOfTopStrengths = allStrengths.map(strength => strength[checkCounter]);
             const maxValue = listOfTopStrengths.reduce((a, b) => Math.max(a, b));
@@ -58,7 +37,6 @@ export const checkWinner = state => {
             if (topStrengthsFiltered.length === 1) {
                 indexOfWinnerPlayer = listOfTopStrengths.indexOf(maxValue);
                 winnerId = newPlayerList[indexOfWinnerPlayer].id;
-                //alert(newPlayerList[indexOfWinnerPlayer].playerName + ' won with higher combo!')
             } else {
                 checkCounter++;
                 determineWinner();
@@ -66,7 +44,33 @@ export const checkWinner = state => {
         }
         determineWinner();
     }
-    return {
+    if (stalemate) {
+        return {
+            ...state,
+            enterAt: Object.assign({}, ...Object.keys(enterAt).map(key => ({
+                [key]: false
+            }))),
+            players: players.map(player => {
+                player.fold = false;
+                player.comboRank = 0;
+                for (let i = 0; i<newPlayerList.length; i++) {
+                    if (player.id === newPlayerList[i].id) {
+                        return {
+                            ...player,
+                            playerChips: player.playerChips + (pot / newPlayerList.length)
+                        };
+                    }
+                }
+                return player;
+            }),
+            pot: 0,
+            betAmountThisRound: 0,
+            popUp: {
+                show: true,
+                payload: 'Stalemate: ' + newPlayerList.map(newPlayer => newPlayer.playerName).join(', ')
+            }
+        };
+    } else return {
         ...state,
         enterAt: Object.assign({}, ...Object.keys(enterAt).map(key => ({
             [key]: false
