@@ -15,7 +15,8 @@ const setInitState = (amountOfPlayers) => {
             deal: false, 
             flop: false, 
             turn: false, 
-            river: false
+            river: false,
+            endgame: false
         },
         deck: [],
         pot: 0,
@@ -26,6 +27,10 @@ const setInitState = (amountOfPlayers) => {
         popUp: {
             show: false, 
             payload: ''
+        },
+        summary: {
+            show: false,
+            winnerColor: null
         }
     }
 }

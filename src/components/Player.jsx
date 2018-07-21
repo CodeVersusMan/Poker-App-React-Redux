@@ -1,5 +1,5 @@
 import React from 'react';
-import Card from './Card';
+import { CardContainer } from '../containers/CardContainer';
 import { BetMenuContainer } from '../containers/BetMenuContainer';
 
 const Player = ({ deck, enterAt, player, playerSeatPosition, currentlyActingPlayer }) => {
@@ -12,7 +12,7 @@ const Player = ({ deck, enterAt, player, playerSeatPosition, currentlyActingPlay
     if (player.fold) playerClassList.push('folded');
     return (
         <div className={playerClassList.join(' ')}>
-            {playerHand.map(card => <Card key={card.id} enterAt={enterAt.deal} fold={player.fold} {...card}/>)}
+            {playerHand.map(card => <CardContainer key={card.id} enterAt={enterAt.deal} fold={player.fold} {...card}/>)}
             < BetMenuContainer player={player} />
         </div> 
     );

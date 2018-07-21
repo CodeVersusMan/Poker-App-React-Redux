@@ -158,6 +158,13 @@ p {
     margin: 0 2px;
 }
 
+.hide-block {
+    width: 0;
+    height: 65%;
+    margin: 0;
+    transition: 0.4s ease-out;
+}
+
 .suit-red {
     font-size: 5vmin;
     color: darkred;
@@ -207,7 +214,6 @@ p {
     background-color: #8CA7BB;
     border: 2px solid white;
     margin-bottom: 5vmin;
-    transform: translate(-21vmax, -21vmin);
 }
 
 .player-wrap {

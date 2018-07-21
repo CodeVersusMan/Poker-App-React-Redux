@@ -28,5 +28,18 @@ export const flipCard = state => {
         return { 
             ...state, enterAt: { ...enterAt, river: true }
         };
-    } else if (enterAt.river) return checkWinner(state);
+    } else if (enterAt.river && !enterAt.endgame) {
+        return checkWinner(state);
+    } else if (enterAt.endgame) {
+        return { 
+            ...state,
+            summary: {
+                show: false,
+                winnerColor: null
+            },
+            enterAt: Object.assign({}, ...Object.keys(enterAt).map(key => ({
+                [key]: false
+            })))
+        };
+    } 
 };

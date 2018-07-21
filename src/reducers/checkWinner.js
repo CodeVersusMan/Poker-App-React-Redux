@@ -47,9 +47,17 @@ export const checkWinner = state => {
     if (stalemate) {
         return {
             ...state,
-            enterAt: Object.assign({}, ...Object.keys(enterAt).map(key => ({
+            summary: {
+                show: true,
+                winnerColor: winnerId
+            },
+            enterAt: {
+                ...enterAt,
+                endgame: true
+            },
+            /*enterAt: Object.assign({}, ...Object.keys(enterAt).map(key => ({
                 [key]: false
-            }))),
+            }))),*/
             players: players.map(player => {
                 player.fold = false;
                 player.comboRank = 0;
@@ -72,9 +80,17 @@ export const checkWinner = state => {
         };
     } else return {
         ...state,
-        enterAt: Object.assign({}, ...Object.keys(enterAt).map(key => ({
+        summary: {
+            show: true,
+            winnerColor: winnerId
+        },
+        enterAt: {
+            ...enterAt,
+            endgame: true
+        },
+       /* enterAt: Object.assign({}, ...Object.keys(enterAt).map(key => ({
             [key]: false
-        }))),
+        }))),*/
         players: players.map((player, index) => {
             player.fold = false;
             player.comboRank = 0            

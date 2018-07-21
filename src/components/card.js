@@ -1,6 +1,7 @@
 import React from 'react';
 import { suits } from '../reducers/suitsAndValues'
-const Card = ({ enterAt, value, suit, playerColors, fold }) => {
+import { playerColorList } from '../reducers/playerColorList'
+const Card = ({ enterAt, value, suit, playerColors, fold, summary }) => {
     let classList = ['card'];
     let suitClass;
 
@@ -13,15 +14,20 @@ const Card = ({ enterAt, value, suit, playerColors, fold }) => {
     } else {
         suitClass = 'suit-black';
     }
-    
-    if (fold) classList.push('folded-cards')
+
+    if (fold) classList.push('folded-cards');
 
     return (
         <div className={classList.join(' ')}>
             <span>{value}</span>
             <span className={suitClass}>{suits[suit]}</span>
             <div className="matches">
-                {playerColors.map((color, index) => <div key={index} className={"match-block " + color}></div>)}
+                {playerColors.map((color, index) => {
+                    if (summary.show && color !== playerColorList[summary.winnerColor] && color !== "purple") {
+                        return <div key={index} className={"hide-block " + color}></div> 
+                    }
+                    return <div key={index} className={"match-block " + color}></div>
+                })}
             </div>
         </div> 
     );

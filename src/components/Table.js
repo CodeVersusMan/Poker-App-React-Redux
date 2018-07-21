@@ -1,5 +1,5 @@
 import React from 'react';
-import Card from './Card'
+import { CardContainer } from '../containers/CardContainer'
 import { ButtonContainer } from '../containers/ButtonContainer'
 import { PotContainer } from '../containers/PotContainer'
 
@@ -21,7 +21,7 @@ const Table = ({deck, enterAt, players}) => {
                     if (index === 4) {
                         orderOfEntrance = enterAt.river
                     }
-                    return (<Card key={card.id} {...card} enterAt={orderOfEntrance} />);
+                    return (<CardContainer key={card.id} {...card} enterAt={orderOfEntrance} />);
                 })}
             </div> 
             < ButtonContainer />
